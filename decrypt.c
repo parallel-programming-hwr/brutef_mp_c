@@ -67,6 +67,7 @@ int main(int argc, char const *argv[]) {
     // read a block of rainbow values
     int success = 0;
     while ((num_rainbow_values=fread(rs, sizeof(struct s_rainbowvalue256),BULKSIZE,fptr_rainbow ))!=0){
+        if (success==1){break;}
         printf("read %d rainbow values\n", (int) num_rainbow_values);
         // iterate through rainbow values and decrypt
 
@@ -77,12 +78,14 @@ int main(int argc, char const *argv[]) {
             if (gcry_cipher_open(&dhd,cipher,GCRY_CIPHER_MODE_CFB,0)){perror("could not open cypher\n");}
             if (gcry_cipher_setkey(dhd,rs[i].hash,8)){perror("could not set key\n");};
             void * iv = malloc(len);
+            memset(iv,0,len);
             if (gcry_cipher_setiv(dhd, iv , len)){perror("could not set init vector\n");}
             if (gcry_cipher_decrypt(dhd,decrypted_buf,file_len,buf,file_len)){perror("could not decrypt\n");}
             //mycryptwrapper_print(decrypted_buf,file_len);
+            //printf("pw: %s\nfile:%s\n",rs[i].pw,decrypted_buf);
             if (check_sha256_tag(decrypted_buf,file_len)){
                 printf("pw: %s\n", rs[i].pw);
-                
+
                 char * enc_fname = malloc(strlen(argv[2])+5);
                 strcpy(enc_fname, argv[2]);
                 strcat(enc_fname,".decr");
@@ -96,11 +99,14 @@ int main(int argc, char const *argv[]) {
                 printf("successfully saved decrypted data in %s\n", enc_fname);
                 //return 0;
                 success=1;
-#pragma omp exitregion
+            #pragma omp exitregion
                 }
             free(iv);
             free(decrypted_buf);
             gcry_cipher_close(dhd);
+        }
+        if (success==1){
+#pragma omp exitregion
         }
     }
     /*while (fread(&r, sizeof(struct s_rainbowvalue256), 1,fptr)) {//reading hash values from rainbowtable

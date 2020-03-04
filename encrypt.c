@@ -30,6 +30,9 @@ int main(int argc, char const *argv[]) {
     rewind(fptr);// sets pointer to beginning of file
     //printf("file is %d long\n", file_len);
     char * buf_out = malloc(file_len + 32); //  for sha256 check sum 32*8=256 lol
+    if (buf_out==NULL){
+        perror("could not allocate memory\n");
+    }
     if (buf_out == NULL){
         printf("could not allocate memory, maybe file is too large\n");
         return 1;
@@ -48,7 +51,8 @@ int main(int argc, char const *argv[]) {
     mycryptwrapper_init();
     gcry_md_hash_buffer(algo,pw_hash,argv[2],strlen(argv[2]));
     gcry_md_hash_buffer(algo,file_hash,buf_out,file_len);
-
+    printf("filehash:\n");
+    mycryptwrapper_print(file_hash,32);
 
     //appending sha256 to end of buffer
     for (size_t i = 0; i<+32; i++){

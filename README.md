@@ -5,4 +5,6 @@ usage:
 	./encryptf file password to encrypt file with passwort(the sha256 hash is used)
 	./brutef file.txt.sha256 file.encry to decrypt
 
-notes: does not work with larger files and all threads continue calculating even if password was found
+
+fix:
+does not work with larger files (>60840bytes) and all threads continue calculating even if password was found
