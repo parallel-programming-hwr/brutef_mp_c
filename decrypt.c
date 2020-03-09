@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <strings.h>
 #include <omp.h>
-
+#include <time.h>
 #include <inttypes.h>
 #include "cryptwrapper.h"
 #include "rainbowvalue.h"
@@ -64,15 +64,19 @@ int main(int argc, char const *argv[]) {
 
     struct s_rainbowvalue256 * rs = malloc(sizeof(struct s_rainbowvalue256)*BULKSIZE);
     size_t num_rainbow_values;
+    clock_t old_clock;
     // read a block of rainbow values
     int success = 0;
     while ((num_rainbow_values=fread(rs, sizeof(struct s_rainbowvalue256),BULKSIZE,fptr_rainbow ))!=0){
         if (success==1){break;}
-        printf("read %d rainbow values\n", (int) num_rainbow_values);
+        //printf("read %d rainbow values\n", (int) num_rainbow_values);
         // iterate through rainbow values and decrypt
-
+        old_clock=clock();
     #pragma omp parallel for
         for (size_t i = 0 ; i < num_rainbow_values ; i++){
+            if (success==1){
+                #pragma omp exitregion
+            }
             uint8_t * decrypted_buf = malloc(file_len);//allocate mem for decrypted buffer
             gcry_cipher_hd_t dhd;
             if (gcry_cipher_open(&dhd,cipher,GCRY_CIPHER_MODE_CFB,0)){perror("could not open cypher\n");}
@@ -99,56 +103,18 @@ int main(int argc, char const *argv[]) {
                 printf("successfully saved decrypted data in %s\n", enc_fname);
                 //return 0;
                 success=1;
-            #pragma omp exitregion
+                #pragma omp exitregion
                 }
             free(iv);
             free(decrypted_buf);
             gcry_cipher_close(dhd);
-        }
-        if (success==1){
-#pragma omp exitregion
-        }
+        }// end parallel
+        float sec = (float)((clock()-old_clock))/(float)CLOCKS_PER_SEC;
+        printf("\rcalc/sec: %4.0f", num_rainbow_values/sec);
+
     }
-    /*while (fread(&r, sizeof(struct s_rainbowvalue256), 1,fptr)) {//reading hash values from rainbowtable
-        gcry_cipher_hd_t dhd;
-        gcry_error_t err= gcry_cipher_open(&dhd,cipher,GCRY_CIPHER_MODE_CFB,0);
-        if (err){
-            printf("could not open handle\n");
-        }
-        err = gcry_cipher_setkey(dhd,r.hash,8);
-        if (err) {
-            printf("could not set key \n");
-        }
-        memset(iv,0,len);
-        err = gcry_cipher_setiv(dhd, iv , len);
-        if (err){
-            printf("could not init init vector");
-        }
-
-
-        memset(out,0,256);
-        err = gcry_cipher_decrypt(dhd,out,256,encrypted_secret,strlen(encrypted_secret));
-        if (err){
-            printf("could not decrypt\n");
-            }
-
-        if (strcmp(out,dummydata)==0){
-            printf("pw: %sfor data: %s\npwhash: ", r.pw, (char*)out);
-            mycryptwrapper_print(r.hash, strlen(r.hash));
-            gcry_cipher_close(dhd);//close cipher
-            return 0;
-        }
-        gcry_cipher_close(dhd);//close cipher
-    }
-*/
     if(success==0){
         printf("\nnothing found\n");
-
     }
-
-    //printdata(digest,mens);
-
-
-
     return 0;
 }
