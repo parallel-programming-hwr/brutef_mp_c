@@ -1,9 +1,9 @@
 #include "readBulk.h"
 
-size_t getBulk(FILE * fptr, char  bulk[BULKSIZE][MAXPWSIZE]){
+size_t getBulk(FILE * fptr, char  bulk[BULKSIZE][MAX_PW_LEN]){
     size_t i;
     for (i = 0; i < BULKSIZE; ++i) {
-        if (!fgets(bulk[i], MAXPWSIZE, fptr)){
+        if (!fgets(bulk[i], MAX_PW_LEN, fptr)){
             break;
         }
     }
@@ -12,14 +12,6 @@ size_t getBulk(FILE * fptr, char  bulk[BULKSIZE][MAXPWSIZE]){
 size_t getHashBulk(FILE *fptr, struct s_rainbowvalue256 rs[BULKSIZE]){
     return fread(rs, sizeof(struct s_rainbowvalue256),BULKSIZE,fptr );
 }
-
-size_t write_rainbow_bulk(FILE *fptr ,struct s_rainbowvalue256 rs[BULKSIZE], size_t len ){
-    for (size_t i = 0 ; i<len ; i++){
-        fprintf(fptr,"%s,",rs[i].pw);
-        for (int j = 0; j<32 ; j++){
-            fprintf(fptr,"%02x",rs[i].hash[j]);
-        }
-        fprintf(fptr,"\n");
-    }
-    return len;
+size_t writeHashHumanReadable(FILE *fptr, struct s_rainbowvalue256 rs[BULKSIZE]){
+    return 0;
 }
