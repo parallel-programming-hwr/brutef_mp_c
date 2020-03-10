@@ -37,6 +37,6 @@ size_t writeHashHumanReadable(FILE *fptr, struct s_rainbowvalue256 rs[BULKSIZE])
  * @param rs
  * @return
  */
-size_t writeHashBase64(FILE *fptr, struct s_rainbowvalue256 rs[BULKSIZE]);
+size_t writeHashBase64(FILE *fptr,size_t num, struct s_rainbowvalue256 rs[BULKSIZE]);
 
 #endif
