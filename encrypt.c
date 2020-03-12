@@ -64,12 +64,14 @@ int main(int argc, char const *argv[]) {
         perror("could not open handle for cipher\n");
         return 1;
     }
+
     if(gcry_cipher_setkey(hd,pw_hash,8)){
         printf("could not set key for encryption");
         return 1;
     }
     size_t len = 8;
     void * iv = malloc(len);
+    memset(iv,0,len);
     if (gcry_cipher_setiv(hd, iv , len)){
         printf("could not init init vector");
         return 1;
@@ -82,7 +84,7 @@ int main(int argc, char const *argv[]) {
         perror("could not write all data\n");
         return 1;
     }
-
+    free(iv);
     gcry_cipher_close(hd);
 
     fclose(fptr);
