@@ -104,7 +104,7 @@ int main(int argc, char const *argv[]) {
                 //return 0;
                 success=1;
                 #pragma omp exitregion
-                }
+                }// decryption succesfull end
             free(iv);
             free(decrypted_buf);
             gcry_cipher_close(dhd);

@@ -8,6 +8,82 @@
 
 #include "cryptwrapper.h"
 
+#include <argp.h>
+
+const char *argp_program_version =
+        "create Rainbow 0.1";
+/* Program documentation. */
+static char doc[] =
+        "I wonder for what this is";
+
+static struct argp_option options[] = {
+        {"verbose",  'v', 0,      0,  "Produce verbose output" },
+        {"quiet",    'q', 0,      0,  "Don't produce any output" },
+        {"output",   'o', "FILE", 0, "Output to FILE instead of <name of input file>.encry" },
+        {"authentication_mode",   'm', "MODE", 0, "default MtE (only one implemented)" },
+        {"password",   'p', "clear_pw", 0, "password used for encryption" },
+        { 0 }
+};
+struct arguments
+{
+    char *authentication_mode;
+    char *output_file;
+    char *input_file;
+    char *clear_pw;
+    int silent, verbose;
+    int use_output_file, use_clear_pw;
+};
+/* Parse a single option. */
+static error_t
+parse_opt (int key, char *arg, struct argp_state *state)
+{
+    /* Get the input argument from argp_parse, which we
+       know is a pointer to our arguments structure. */
+    struct arguments *arguments = state->input;
+
+    switch (key)
+    {
+        case 'q': case 's':
+            arguments->silent = 1;
+            break;
+        case 'v':
+            arguments->verbose = 1;
+            break;
+        case 'o':
+            arguments->output_file = arg;
+            arguments->use_output_file = 1;
+            break;
+        case 'p':
+            arguments->use_clear_pw = 1;
+            arguments->clear_pw = arg;
+            break;
+        case ARGP_KEY_ARG:
+            if (state->arg_num >= 1)
+                /* Too many arguments. */
+                argp_usage (state);
+
+            arguments->input_file = arg;
+
+            break;
+
+        case ARGP_KEY_END:
+            if (state->arg_num < 1)
+                /* Not enough arguments. */
+                argp_usage (state);
+            break;
+
+
+        default:
+            return ARGP_ERR_UNKNOWN;
+    }
+    return 0;
+}
+
+/* Our argp parser. */
+static struct argp argp = { options, parse_opt, 0 , doc };
+//parsing args set up end---------------------------------------------------------------
+
+
 int main(int argc, char const *argv[]) {
     if (argc < 3){
         printf("please select file and pw\n");

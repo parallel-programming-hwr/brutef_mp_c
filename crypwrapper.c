@@ -4,7 +4,7 @@ void mycryptwrapper_init(){
 
     /* Version check should be the very first call because it
     makes sure that important subsystems are initialized.
-    #define NEED_LIBGCRYPT_VERSION to the minimum required version. */
+    */
     if (!gcry_check_version (GCRYPT_VERSION))
     {
         fprintf (stderr, "libgcrypt is too old (need %s, have %s)\n",
@@ -36,24 +36,11 @@ void  mycryptwrapper_print(const void * buf, size_t len){
 int check_sha256_tag(uint8_t * ptr, size_t file_len){
     uint8_t * calc_hash = malloc(HASH_SIZE);
     gcry_md_hash_buffer(algo,calc_hash,ptr,file_len-HASH_SIZE);
-    /*printf("hash\n");
-    mycryptwrapper_print(calc_hash,32);
-    printf("HASH in file:\n");
-    for (int i = 0 ; i< HASH_SIZE; i++){
-        printf("%02x ", ptr[file_len+i-HASH_SIZE]);
-    }
-    printf("file:\n%s",(char* )ptr);
-*/
     for (int i=0 ; i< HASH_SIZE; i++){
-        //printf("%02x ", calc_hash[i]);
         if (calc_hash[i] != ptr[i+file_len-HASH_SIZE]){
             free(calc_hash);
-           // printf("no match\n");
             return 0;
         }
     }
-
-
     return 1;
-
 }

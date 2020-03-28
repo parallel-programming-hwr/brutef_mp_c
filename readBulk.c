@@ -16,5 +16,5 @@ size_t writeHashHumanReadable(FILE *fptr, struct s_rainbowvalue256 rs[BULKSIZE])
     return 0;
 }
 size_t writeHashBase64(FILE *fptr,size_t num ,struct s_rainbowvalue256 rs[BULKSIZE]){
-
+    return 0;
 }
